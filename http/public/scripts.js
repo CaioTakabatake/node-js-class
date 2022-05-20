@@ -2,6 +2,12 @@ const ul = document.querySelector("ul")
 const input = document.querySelector("input")
 const form = document.querySelector('form')
 
+async function load() {
+    const res = await fetch('http://localhost:3000').then(data => data.json());
+    res.urls.map(({ name, url }) => addElement({ name, url }));
+}
+
+load()
 
 function addElement({ name, url }) {
     const li = document.createElement('li')
@@ -21,8 +27,12 @@ function addElement({ name, url }) {
 }
 
 function removeElement(el) {
-    if (confirm('Tem certeza que deseja deletar?'))
+    if (confirm('Tem certeza que deseja deletar?')) {
+        const url = el.parentNode.children[0].href.slice(0, -1);
+        const name = el.parentNode.children[0].text;
+        fetch(`http://localhost:3000?name=${name}&url=${url}&del=1`);
         el.parentNode.remove()
+    }
 }
 
 form.addEventListener("submit", (event) => {
@@ -30,18 +40,20 @@ form.addEventListener("submit", (event) => {
 
     let { value } = input
 
-    if (!value) 
+    if (!value)
         return alert('Preencha o campo')
 
     const [name, url] = value.split(",")
 
-    if (!url) 
+    if (!url)
         return alert('formate o texto da maneira correta')
 
-    if (!/^http/.test(url)) 
+    if (!/^http/.test(url))
         return alert("Digite a url da maneira correta")
 
-    addElement({ name, url })
+    addElement({ name, url });
+    fetch(`http://localhost:3000?name=${name}&url=${url}`);
+
 
     input.value = ""
 })
